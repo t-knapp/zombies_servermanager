@@ -19,14 +19,14 @@
 package servermanager;
 
 /**
- * Servermanager exception class.
+ * Servermanager SQL exception class.
  * @author cheese
  */
-public class SMException extends Exception {
+public class SMSQLException extends Exception {
     /**
      * Will throw an error without any parameters.
      */
-    public SMException() { 
+    public SMSQLException() { 
         super();
         Servermanager.log.logException();
     }
@@ -35,7 +35,7 @@ public class SMException extends Exception {
      * 
      * @param message A string containing the error message.
      */
-    public SMException( String message ) {
+    public SMSQLException( String message ) {
         super( message );
         Servermanager.log.logException( message );
     }
@@ -45,7 +45,7 @@ public class SMException extends Exception {
      * @param message A string containing the error message.
      * @param cause A throwable containing the cause.
      */
-    public SMException( String message, Throwable cause ) {
+    public SMSQLException( String message, Throwable cause ) {
         super( message, cause );
         Servermanager.log.logException( message );
     }
@@ -54,7 +54,7 @@ public class SMException extends Exception {
      *
      * @param cause A throwable containing the cause.
      */
-    public SMException( Throwable cause ) {
+    public SMSQLException( Throwable cause ) {
         super( cause );
         Servermanager.log.logException( cause.getMessage() );
     }

@@ -18,30 +18,24 @@
 
 package servermanager;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
- * Main class.
+ * Database entry point.
+ * @author cheese
  */
-public class Servermanager {
+public class SMDatabase {
+    private Connection connnection = null;
+    private Statement statement = null;
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
     
-    /**
-     * Publicly available log.
-     */
-    public static SMLog log;
-    
-    /**
-     * Publicly available database.
-     */
-    public static SMDatabase db;
-    
-    /**
-     * Main entry point to program.
-     * @param args Any command line arguments.
-     * @throws SMException
-     */
-    public static void main( String[] args ) throws SMException {
-        log = new SMLog();
-        log.setLogLevel( log.LEVEL_INFO );
-        
-        db = new SMDatabase();
+    public SMDatabase() throws SMException {
+        Servermanager.log.write( "Initializing SMDatabase" );
     }
 }

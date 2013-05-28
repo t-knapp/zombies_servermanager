@@ -54,11 +54,11 @@ public class SMLog {
      */
     public static int LEVEL_OVERRIDE = 0x05;
     
-    int lv = LEVEL_WARNING;
-    Date time;
-    String logname = "SMLog.log";
-    FileWriter fileWriter;
-    BufferedWriter logger;
+    private int lv = LEVEL_WARNING;
+    private Date time;
+    private String logname = "SMLog.log";
+    private FileWriter fileWriter;
+    private BufferedWriter logger;
     
     /**
      *
@@ -70,10 +70,10 @@ public class SMLog {
             if ( !fl.exists() )
                 fl.createNewFile();
                 
-            fileWriter = new FileWriter( fl );
-            logger = new BufferedWriter( fileWriter );
+            this.fileWriter = new FileWriter( fl );
+            this.logger = new BufferedWriter( fileWriter );
             
-            time = new Date();
+            this.time = new Date();
             
             write( "===============", LEVEL_OVERRIDE );
             write( "Log initialized", LEVEL_OVERRIDE );
@@ -82,6 +82,16 @@ public class SMLog {
         catch ( IOException ex ) {
             throw new SMException( ex.getMessage() );
         }
+    }
+    
+    /**
+     * Sets the log level.
+     * @param lvl Log level to be set.
+     * @throws SMException 
+     */
+    public void setLogLevel( int lvl ) throws SMException {
+        this.lv = lvl;
+        write( "Log level set to " + lvl );
     }
     
     /**
@@ -104,13 +114,56 @@ public class SMLog {
             if ( lvl != LEVEL_OVERRIDE && ( lvl < lv || lv == LEVEL_NONE ) )
                 return;
             
-            logger.write( time.getTime() + ";" + message );
+            if ( lvl == LEVEL_WARNING )
+                this.logger.write( "*** WARNING ***" );
+            else if ( lvl == LEVEL_ERROR )
+                this.logger.write( "***** ERROR *****" );
+
+            this.logger.write( time.getTime() + ";" + message );
             if ( !message.contains( "\n" ) )
-                logger.write( "\n" );
-            logger.flush();
+                this.logger.write( "\n" );
+            this.logger.flush();
         }
         catch ( IOException ex ) {
             throw new SMException( ex.getMessage() );
+        }
+    }
+    
+    /**
+     * 'Safe' and exception free logging from our exception calls to prevent infinite loops
+     */
+    public void logRuntimeException() {
+        logRuntimeException( "Runtime exception" );
+    }
+    
+    /**
+     * 'Safe' and exception free logging from our exception calls to prevent infinite loops
+     * @param message The exception message.
+     */
+    public void logRuntimeException( String message ) {
+        try {
+            write( message, LEVEL_ERROR );
+        }
+        catch ( SMException ex ) {
+        }
+    }
+    
+    /**
+     * 'Safe' and exception free logging from our exception calls to prevent infinite loops
+     */
+    public void logException() {
+        logException( "Exception" );
+    }
+    
+    /**
+     * 'Safe' and exception free logging from our exception calls to prevent infinite loops
+     * @param message The exception message.
+     */
+    public void logException( String message ) {
+        try {
+            write( message, LEVEL_WARNING );
+        }
+        catch ( SMException ex ) {
         }
     }
 }
