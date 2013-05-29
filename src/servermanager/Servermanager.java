@@ -42,6 +42,17 @@ public class Servermanager {
         log = new SMLog();
         log.setLogLevel( log.LEVEL_INFO );
         
-        db = new SMDatabase();
+        SMConfig.load();
+        
+        if ( SMConfig.containsKey( "server_ip" ) )
+            SMCoD.setIP( SMConfig.getString( "server_ip" ) );
+        if ( SMConfig.containsKey( "server_port" ) )
+            SMCoD.setPort( SMConfig.getInt( "server_port" ) );
+        if ( SMConfig.containsKey( "server_rconpassword" ) )
+            SMCoD.setRconPassword( SMConfig.getString( "server_rconpassword" ) );
+        if ( SMConfig.containsKey( "server_delay" ) )
+            SMCoD.setRconDelay( SMConfig.getInt( "server_delay" ) );
+        
+        //db = new SMDatabase( "localhost", "test", "test", "test123" );
     }
 }

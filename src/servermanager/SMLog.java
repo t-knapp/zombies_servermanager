@@ -113,13 +113,16 @@ public class SMLog {
         try {
             if ( lvl != LEVEL_OVERRIDE && ( lvl < lv || lv == LEVEL_NONE ) )
                 return;
-            
-            if ( lvl == LEVEL_WARNING )
-                this.logger.write( "*** WARNING ***" );
-            else if ( lvl == LEVEL_ERROR )
-                this.logger.write( "***** ERROR *****" );
 
-            this.logger.write( time.getTime() + ";" + message );
+            this.logger.write( time.getTime() + ";" );
+     
+            if ( lvl == LEVEL_WARNING )
+                this.logger.write( "*** WARNING *** " );
+            else if ( lvl == LEVEL_ERROR )
+                this.logger.write( "***** ERROR ***** " );
+
+            this.logger.write( message );
+            
             if ( !message.contains( "\n" ) )
                 this.logger.write( "\n" );
             this.logger.flush();

@@ -30,12 +30,35 @@ import java.sql.Statement;
  * @author cheese
  */
 public class SMDatabase {
-    private Connection connnection = null;
+    private Connection connection = null;
     private Statement statement = null;
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
     
+    /**
+     * Basic constructor. Does nothing.
+     * @throws SMException
+     */
     public SMDatabase() throws SMException {
-        Servermanager.log.write( "Initializing SMDatabase" );
+    }
+    
+    /**
+     * Main constructor for the database.
+     * @param url URL of the server.
+     * @param database Database name.
+     * @param username Username to connect with.
+     * @param password Password of the user.
+     * @throws SMException
+     */
+    public SMDatabase( String url, String database, String username, String password ) throws SMException {
+        try {
+            connection = DriverManager.getConnection( "jdbc:mysql://" + url + "/" + database + "?user=" + username + "&password=" + password );
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery( "SELECT VERSION()" );
+            Servermanager.log.write( "MySQL version : " + resultSet.getString( 1 ) );
+        }
+        catch ( SQLException ex ) {
+            throw new SMRuntimeException( ex.getMessage() );
+        }
     }
 }
