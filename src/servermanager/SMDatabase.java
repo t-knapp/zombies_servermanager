@@ -55,7 +55,7 @@ public class SMDatabase {
             connection = DriverManager.getConnection( "jdbc:mysql://" + url + "/" + database + "?user=" + username + "&password=" + password );
             statement = connection.createStatement();
             resultSet = statement.executeQuery( "SELECT VERSION()" );
-            Servermanager.log.write( "MySQL version : " + resultSet.getString( 1 ) );
+            SMLog.write( "MySQL version : " + resultSet.getString( 1 ) );
         }
         catch ( SQLException ex ) {
             throw new SMRuntimeException( ex.getMessage() );

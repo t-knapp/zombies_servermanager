@@ -28,7 +28,7 @@ import java.util.Date;
  * Servermanager logger class
  * @author cheese
  */
-public class SMLog {
+public abstract class SMLog {
     /**
      * Log level 'none' will print nothing to the log.
      */
@@ -54,26 +54,26 @@ public class SMLog {
      */
     public static int LEVEL_OVERRIDE = 0x05;
     
-    private int lv = LEVEL_WARNING;
-    private Date time;
-    private String logname = "SMLog.log";
-    private FileWriter fileWriter;
-    private BufferedWriter logger;
+    private static int lv = LEVEL_WARNING;
+    private static Date time;
+    private static String logname = "SMLog.log";
+    private static FileWriter fileWriter;
+    private static BufferedWriter logger;
     
     /**
-     *
+     * Loads the log file.
      * @throws SMException
      */
-    public SMLog() throws SMException {
+    public static void load() throws SMException {
         try {
             File fl = new File( logname );
             if ( !fl.exists() )
                 fl.createNewFile();
                 
-            this.fileWriter = new FileWriter( fl );
-            this.logger = new BufferedWriter( fileWriter );
+            fileWriter = new FileWriter( fl );
+            logger = new BufferedWriter( fileWriter );
             
-            this.time = new Date();
+            time = new Date();
             
             write( "===============", LEVEL_OVERRIDE );
             write( "Log initialized", LEVEL_OVERRIDE );
@@ -89,8 +89,8 @@ public class SMLog {
      * @param lvl Log level to be set.
      * @throws SMException 
      */
-    public void setLogLevel( int lvl ) throws SMException {
-        this.lv = lvl;
+    public static void setLogLevel( int lvl ) throws SMException {
+        lv = lvl;
         write( "Log level set to " + lvl );
     }
     
@@ -99,7 +99,7 @@ public class SMLog {
      * @param message The message to write.
      * @throws SMException
      */
-    public void write( String message ) throws SMException {
+    public static void write( String message ) throws SMException {
         write( message, LEVEL_INFO );
     }
     
@@ -109,23 +109,23 @@ public class SMLog {
      * @param lvl The log level of the message.
      * @throws SMException
      */
-    public void write( String message, int lvl ) throws SMException {
+    public static void write( String message, int lvl ) throws SMException {
         try {
             if ( lvl != LEVEL_OVERRIDE && ( lvl < lv || lv == LEVEL_NONE ) )
                 return;
 
-            this.logger.write( time.getTime() + ";" );
+            logger.write( time.getTime() + ";" );
      
             if ( lvl == LEVEL_WARNING )
-                this.logger.write( "*** WARNING *** " );
+                logger.write( "*** WARNING *** " );
             else if ( lvl == LEVEL_ERROR )
-                this.logger.write( "***** ERROR ***** " );
+                logger.write( "***** ERROR ***** " );
 
-            this.logger.write( message );
+            logger.write( message );
             
             if ( !message.contains( "\n" ) )
-                this.logger.write( "\n" );
-            this.logger.flush();
+                logger.write( "\n" );
+            logger.flush();
         }
         catch ( IOException ex ) {
             throw new SMException( ex.getMessage() );
@@ -135,7 +135,7 @@ public class SMLog {
     /**
      * 'Safe' and exception free logging from our exception calls to prevent infinite loops
      */
-    public void logRuntimeException() {
+    public static void logRuntimeException() {
         logRuntimeException( "Runtime exception" );
     }
     
@@ -143,7 +143,7 @@ public class SMLog {
      * 'Safe' and exception free logging from our exception calls to prevent infinite loops
      * @param message The exception message.
      */
-    public void logRuntimeException( String message ) {
+    public static void logRuntimeException( String message ) {
         try {
             write( message, LEVEL_ERROR );
         }
@@ -154,7 +154,7 @@ public class SMLog {
     /**
      * 'Safe' and exception free logging from our exception calls to prevent infinite loops
      */
-    public void logException() {
+    public static void logException() {
         logException( "Exception" );
     }
     
@@ -162,7 +162,7 @@ public class SMLog {
      * 'Safe' and exception free logging from our exception calls to prevent infinite loops
      * @param message The exception message.
      */
-    public void logException( String message ) {
+    public static void logException( String message ) {
         try {
             write( message, LEVEL_WARNING );
         }

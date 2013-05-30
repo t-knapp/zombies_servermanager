@@ -38,8 +38,11 @@ public abstract class SMConfig {
         dictionary = new HashMap();
         
         try {
+            SMLog.write( "Loading config file..." );
+            
             File fl = new File( configname );
             if ( !fl.exists() ) {
+                SMLog.write( "Config does not exist, creating..." );
                 fl.createNewFile();
                 return;
             }
@@ -56,7 +59,7 @@ public abstract class SMConfig {
                 try {
                     linenumber++;
                     
-                    if ( line.startsWith( "//" ) )
+                    if ( line.startsWith( "#" ) )
                         continue;
                     
                     if ( line.trim().isEmpty() )
@@ -106,6 +109,8 @@ public abstract class SMConfig {
         catch ( IOException ex ) {
             throw new SMRuntimeException( ex.getMessage() );
         }
+        
+        SMLog.write( "Config loaded." );
     }
     
     public static void setConfigName( String name ) throws SMException {

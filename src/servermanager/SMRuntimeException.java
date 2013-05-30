@@ -28,7 +28,7 @@ public class SMRuntimeException extends RuntimeException {
      */
     public SMRuntimeException() { 
         super();
-        Servermanager.log.logRuntimeException();
+        SMLog.logRuntimeException();
     }
     
     /**
@@ -37,7 +37,7 @@ public class SMRuntimeException extends RuntimeException {
      */
     public SMRuntimeException( String message ) {
         super( message );
-        Servermanager.log.logRuntimeException( message );
+        SMLog.logRuntimeException( message );
     }
     
     /**
@@ -47,7 +47,7 @@ public class SMRuntimeException extends RuntimeException {
      */
     public SMRuntimeException( String message, Throwable cause ) {
         super( message, cause );
-        Servermanager.log.logRuntimeException( message );
+        SMLog.logRuntimeException( message );
     }
     
     /**
@@ -56,6 +56,6 @@ public class SMRuntimeException extends RuntimeException {
      */
     public SMRuntimeException( Throwable cause ) {
         super( cause );
-        Servermanager.log.logRuntimeException( cause.getMessage() );
+        SMLog.logRuntimeException( cause.getMessage() );
     }
 }

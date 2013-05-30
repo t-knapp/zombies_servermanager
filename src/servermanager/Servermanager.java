@@ -21,13 +21,7 @@ package servermanager;
 /**
  * Main class.
  */
-public class Servermanager {
-    
-    /**
-     * Publicly available log.
-     */
-    public static SMLog log;
-    
+public class Servermanager {   
     /**
      * Publicly available database.
      */
@@ -39,8 +33,8 @@ public class Servermanager {
      * @throws SMException
      */
     public static void main( String[] args ) throws SMException {
-        log = new SMLog();
-        log.setLogLevel( log.LEVEL_INFO );
+        SMLog.load();
+        SMLog.setLogLevel( SMLog.LEVEL_INFO );
         
         SMConfig.load();
         

@@ -28,7 +28,7 @@ public class SMException extends Exception {
      */
     public SMException() { 
         super();
-        Servermanager.log.logException();
+        SMLog.logException();
     }
     
     /**
@@ -37,7 +37,7 @@ public class SMException extends Exception {
      */
     public SMException( String message ) {
         super( message );
-        Servermanager.log.logException( message );
+        SMLog.logException( message );
     }
     
     /**
@@ -47,7 +47,7 @@ public class SMException extends Exception {
      */
     public SMException( String message, Throwable cause ) {
         super( message, cause );
-        Servermanager.log.logException( message );
+        SMLog.logException( message );
     }
     
     /**
@@ -56,6 +56,6 @@ public class SMException extends Exception {
      */
     public SMException( Throwable cause ) {
         super( cause );
-        Servermanager.log.logException( cause.getMessage() );
+        SMLog.logException( cause.getMessage() );
     }
 }
