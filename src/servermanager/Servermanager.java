@@ -21,12 +21,7 @@ package servermanager;
 /**
  * Main class.
  */
-public class Servermanager {   
-    /**
-     * Publicly available database.
-     */
-    public static SMDatabase db;
-    
+public class Servermanager {      
     /**
      * Main entry point to program.
      * @param args Any command line arguments.
@@ -38,6 +33,7 @@ public class Servermanager {
         
         SMConfig.load();
         
+        // apply cod settings from config file
         if ( SMConfig.containsKey( "server_ip" ) )
             SMCoD.setIP( SMConfig.getString( "server_ip" ) );
         if ( SMConfig.containsKey( "server_port" ) )
@@ -47,6 +43,137 @@ public class Servermanager {
         if ( SMConfig.containsKey( "server_delay" ) )
             SMCoD.setRconDelay( SMConfig.getInt( "server_delay" ) );
         
-        //db = new SMDatabase( "localhost", "test", "test", "test123" );
+        // apply mysql settings from config file
+        if ( SMConfig.containsKey( "mysql_url" ) )
+            SMDatabase.setURL( SMConfig.getString( "mysql_url" ) );
+        if ( SMConfig.containsKey( "mysql_port" ) )
+            SMDatabase.setPort( SMConfig.getInt( "mysql_port" ) );
+        if ( SMConfig.containsKey( "mysql_database" ) )
+            SMDatabase.setDatabase( SMConfig.getString( "mysql_database" ) );
+        if ( SMConfig.containsKey( "mysql_username" ) )
+            SMDatabase.setUsername( SMConfig.getString( "mysql_username" ) );
+        if ( SMConfig.containsKey( "mysql_password" ) )
+            SMDatabase.setPassword( SMConfig.getString( "mysql_password" ) );
+        
+        SMDatabase.connect();
+        
+        try {         
+            int ticks = 0;
+            boolean serveralive = true;
+            boolean goodrcon = false;
+            boolean initcvars = false;
+            
+            // temporary values
+            String tmp = null;
+            String tmparray[] = null;
+            double tmpdouble = 0;
+            int tmpint = 0;
+
+            if ( SMCoD.checkServerStatus() )
+                goodrcon = SMCoD.checkRconPassword();
+            else
+                serveralive = false;
+            
+            // defaults
+            int frametime = 50;
+            double fps = 20.0;
+            
+            while ( true ) {
+                try {
+                    ticks++;
+                    Thread.sleep( frametime );
+                    
+                    // every 10 seconds check if the server is alive
+                    if ( ticks % (int)( fps * 10 ) == 0 ) {
+                        if ( !SMCoD.checkServerStatus() ) {
+                            serveralive = false;
+                            throw new SMException( "Server not alive" );
+                        }
+                        else
+                            serveralive = true;
+                        
+                        if ( !goodrcon )
+                            goodrcon = SMCoD.checkRconPassword();
+                    }
+                    
+                    if ( goodrcon ) {
+                        if ( !initcvars ) {
+                            initcvars = initCvars();
+                        
+                            // if our frametime hasn't been set yet, grab it
+                            tmp = SMCoD.stripRequest( SMCoD.rcon( "sv_fps" ) );
+                            fps = Double.parseDouble( tmp );
+                            tmpdouble = (double)( 1 / fps );
+                            frametime = (int)( tmpdouble * 1000 );
+
+                            SMLog.write( "Server tickrate: 1/" + fps + " = " + frametime + " ms frametime" );
+                        }
+
+                        // do various things per tick
+                        if ( serveralive ) {
+                            // every 5 seconds, check if there's a low priority server request
+                            // e.g. unix timestamp update, tickcount update
+                            if ( ticks % (int)( fps * 5 ) == 0 ) {
+                                tmp = SMCoD.stripRequest( SMCoD.rcon( "sm_request_low" ) );
+                                SMRequests.parseRequest( tmp, "sm_request_low" );
+
+                                tmp = SMCoD.stripRequest( SMCoD.rcon( "sm_tickcount" ) );
+                                if ( !tmp.isEmpty() ) {
+                                    tmpint = Integer.parseInt( tmp );
+                                    if ( tmpint != ticks ) {
+                                        SMLog.write( "Updating tickcount (was " + ticks + ") to " + tmpint );
+                                        ticks = tmpint;
+                                    }
+                                }
+
+                                tmp = null;
+                            }
+
+                            // every second, check if there's a medium priority server request
+                            // e.g. idk
+                            if ( ticks % fps == 0 ) {
+                                tmp = SMCoD.stripRequest( SMCoD.rcon( "sm_request_med" ) );
+                                SMRequests.parseRequest( tmp, "sm_request_med" );
+
+                                tmp = null;
+                            }
+
+                            // every 1/5 of a second, check if there's a high priority server request
+                            // e.g. players connecting, requesting stats, etc.
+                            if ( ticks % (int)( fps / 5 ) == 0 ) {
+                                tmp = SMCoD.stripRequest( SMCoD.rcon( "sm_request_high" ) );
+                                SMRequests.parseRequest( tmp, "sm_request_high" );
+
+                                tmp = null;
+                            }
+
+                            tmp = null;
+                            tmparray = null;
+                            tmpdouble = 0;
+                            tmpint = 0;
+                        }
+                    }
+                }
+                catch ( SMException ex ) {
+                }
+            }
+        }
+        catch ( SMException | InterruptedException | NumberFormatException ex ) {
+            throw new SMRuntimeException( ex.getMessage() );
+        }
+    }
+    
+    public static boolean initCvars() throws SMException {
+        // set our cvars to blank if they are not initialized yet
+        if ( !SMCoD.isCvarSet( "sm_request_low" ) )
+            SMCoD.setCvar( "sm_request_low", "\"\"" );
+        if ( !SMCoD.isCvarSet( "sm_request_med" ) )
+            SMCoD.setCvar( "sm_request_med", "\"\"" );
+        if ( !SMCoD.isCvarSet( "sm_request_high" ) )
+            SMCoD.setCvar( "sm_request_high", "\"\"" );
+        if ( !SMCoD.isCvarSet( "sm_tickcount" ) )
+            SMCoD.setCvar( "sm_tickcount", "\"\"" );
+        
+        return true;
     }
 }

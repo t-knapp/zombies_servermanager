@@ -18,9 +18,9 @@
 
 package servermanager;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.util.Date;
 
@@ -32,33 +32,33 @@ public abstract class SMLog {
     /**
      * Log level 'none' will print nothing to the log.
      */
-    public static int LEVEL_NONE = 0x00;
+    public static final int LEVEL_NONE = 0x00;
     /**
      * Log level 'info' will print any message flagged as info or higher.
      */
-    public static int LEVEL_INFO = 0x01;
+    public static final int LEVEL_INFO = 0x01;
     /**
      * Log level 'warning' will print any message flagged as warning or higher.
      */
-    public static int LEVEL_WARNING = 0x02;
+    public static final int LEVEL_WARNING = 0x02;
     /**
      * Log level 'error' will print any message flagged as error or higher.
      */
-    public static int LEVEL_ERROR = 0x03;
+    public static final int LEVEL_ERROR = 0x03;
     /**
      * Log level 'critical' will only print messages flagged as critical.
      */
-    public static int LEVEL_CRITICAL = 0x04;
+    public static final int LEVEL_CRITICAL = 0x04;
     /**
      * Override for various required log messages.
      */
-    public static int LEVEL_OVERRIDE = 0x05;
+    public static final int LEVEL_OVERRIDE = 0x05;
     
     private static int lv = LEVEL_WARNING;
     private static Date time;
     private static String logname = "SMLog.log";
-    private static FileWriter fileWriter;
-    private static BufferedWriter logger;
+    private static FileOutputStream fileWriter;
+    private static OutputStreamWriter logger;
     
     /**
      * Loads the log file.
@@ -67,11 +67,15 @@ public abstract class SMLog {
     public static void load() throws SMException {
         try {
             File fl = new File( logname );
-            if ( !fl.exists() )
-                fl.createNewFile();
+            if ( !fl.exists() ) {
+                if ( !fl.createNewFile() )
+                    throw new SMException( "Failed to create log file" );
+            }
                 
-            fileWriter = new FileWriter( fl );
-            logger = new BufferedWriter( fileWriter );
+            //fileWriter = new FileWriter( fl, true );
+            //logger = new BufferedWriter( fileWriter );
+            fileWriter = new FileOutputStream( fl, true );
+            logger = new OutputStreamWriter( fileWriter, "US-ASCII" );
             
             time = new Date();
             
@@ -114,7 +118,7 @@ public abstract class SMLog {
             if ( lvl != LEVEL_OVERRIDE && ( lvl < lv || lv == LEVEL_NONE ) )
                 return;
 
-            logger.write( time.getTime() + ";" );
+            logger.write( (int)( System.currentTimeMillis() / 1000L ) + ";" );
      
             if ( lvl == LEVEL_WARNING )
                 logger.write( "*** WARNING *** " );

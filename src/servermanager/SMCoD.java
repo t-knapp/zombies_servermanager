@@ -18,9 +18,9 @@
 package servermanager;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 /**
  * Contains all methods important to Call of Duty.
@@ -44,6 +44,9 @@ public abstract class SMCoD {
         if ( ret.contains( "Bad rconpassword." ) )
                 return "";
         
+        if ( ret.trim().length() == 9 )
+            return "";
+
         return removeColors( ret.trim().substring( 10 ) );
     }
     
@@ -66,13 +69,41 @@ public abstract class SMCoD {
      * @return True if it is alive, false otherwise.
      * @throws SMException
      */
-    public static boolean checkServerStatus() throws SMException {
-        String ret = command( "getstatus" );
+    public static boolean checkServerStatus() {
+        try {
+            String ret = command( "getstatus" );
 
-        if ( ret.contains( "statusResponse" ) )
-            return true;
+            if ( ret.contains( "statusResponse" ) )
+                return true;
+
+            return false;
+        }
+        catch ( Exception ex ) {
+            return false;
+        }
+    }
+    
+    public static String stripRequest( String request ) throws SMException {
+        if ( request.isEmpty() )
+            return "";
+
+        return request.substring( request.indexOf( ":" ) + 2, request.indexOf( "\"", request.indexOf( ":" ) + 2 ) );
+    }
+    
+    public static void setCvar( String cvar, String value ) throws SMException {
+        command( "rcon " + RCON_PASSWORD + " set " + cvar + " " + value );
+    }
+    
+    public static boolean isCvarSet( String cvar ) throws SMException {
+        String ret = command( "rcon " + RCON_PASSWORD + " " + cvar );
         
-        return false;
+        if ( ret.contains( "Bad rconpassword." ) )
+            return false;
+        
+        if ( ret.trim().length() == 9 )
+            return false;
+        
+        return true;
     }
     
     /**

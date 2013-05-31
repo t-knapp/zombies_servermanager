@@ -19,8 +19,10 @@
 package servermanager;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -31,7 +33,7 @@ import java.util.HashMap;
 public abstract class SMConfig {
     private static String configname = "config.cfg";
     private static BufferedReader reader;
-    private static FileReader fileReader;
+    private static FileInputStream fileReader;
     private static HashMap< String, Object > dictionary;
     
     public static void load() throws SMException {
@@ -43,12 +45,13 @@ public abstract class SMConfig {
             File fl = new File( configname );
             if ( !fl.exists() ) {
                 SMLog.write( "Config does not exist, creating..." );
-                fl.createNewFile();
+                if ( !fl.createNewFile() )
+                    throw new SMException( "Failed to create config file" );
                 return;
             }
             
-            fileReader = new FileReader( fl );
-            reader = new BufferedReader( fileReader );
+            fileReader = new FileInputStream( fl );
+            reader = new BufferedReader( new InputStreamReader( fileReader, "US-ASCII" ) );
             
             String line = "";
             int linenumber = 0;
@@ -78,7 +81,7 @@ public abstract class SMConfig {
                     
                     // parse as string, boolean, or int
                     if ( tmp.charAt( 0 ) == '\"' && tmp.charAt( tmp.length() - 1 ) == '\"' )
-                        value = new String( tmp.substring( 1, tmp.length() - 1 ) );
+                        value = tmp.substring( 1, tmp.length() - 1 );
                     else if ( tmp.toLowerCase().equals( "true" ) )
                         value = true;
                     else if ( tmp.toLowerCase().equals( "false" ) )

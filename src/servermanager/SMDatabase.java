@@ -29,18 +29,17 @@ import java.sql.Statement;
  * Database entry point.
  * @author cheese
  */
-public class SMDatabase {
-    private Connection connection = null;
-    private Statement statement = null;
-    private PreparedStatement preparedStatement = null;
-    private ResultSet resultSet = null;
+public abstract class SMDatabase {
+    private static Connection connection = null;
+    private static Statement statement = null;
+    private static PreparedStatement preparedStatement = null;
+    private static ResultSet resultSet = null;
     
-    /**
-     * Basic constructor. Does nothing.
-     * @throws SMException
-     */
-    public SMDatabase() throws SMException {
-    }
+    private static String MYSQL_URL = "localhost";
+    private static int MYSQL_PORT = 3306;
+    private static String MYSQL_DATABASE = "zombies";
+    private static String MYSQL_USERNAME = "zombies_sm";
+    private static String MYSQL_PASSWORD = "zombies123";
     
     /**
      * Main constructor for the database.
@@ -50,15 +49,37 @@ public class SMDatabase {
      * @param password Password of the user.
      * @throws SMException
      */
-    public SMDatabase( String url, String database, String username, String password ) throws SMException {
+    public static void connect() throws SMException {
         try {
-            connection = DriverManager.getConnection( "jdbc:mysql://" + url + "/" + database + "?user=" + username + "&password=" + password );
+            connection = DriverManager.getConnection( "jdbc:mysql://" + MYSQL_URL + ":" + MYSQL_PORT + 
+                    "/" + MYSQL_DATABASE, MYSQL_USERNAME, MYSQL_PASSWORD );
             statement = connection.createStatement();
             resultSet = statement.executeQuery( "SELECT VERSION()" );
-            SMLog.write( "MySQL version : " + resultSet.getString( 1 ) );
+            if ( resultSet.next() )
+                SMLog.write( "MySQL version : " + resultSet.getString( 1 ) );
         }
         catch ( SQLException ex ) {
             throw new SMRuntimeException( ex.getMessage() );
         }
+    }
+    
+    public static void setURL( String url ) {
+        MYSQL_URL = url;
+    }
+    
+    public static void setPort( int port ) {
+        MYSQL_PORT = port;
+    }
+    
+    public static void setDatabase( String database ) {
+        MYSQL_DATABASE = database;
+    }
+    
+    public static void setUsername( String username ) {
+        MYSQL_USERNAME = username;
+    }
+    
+    public static void setPassword( String password ) {
+        MYSQL_PASSWORD = password;
     }
 }
