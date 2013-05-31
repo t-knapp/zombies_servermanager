@@ -27,7 +27,11 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- *
+ * Custom config (.cfg) parser. Features:
+ * - Four variable types: integer, float, boolean, and string
+ * - No whitespace restrictions
+ * - Easily extensible
+ * - Comments via #
  * @author cheese
  */
 public abstract class SMConfig {
@@ -36,6 +40,10 @@ public abstract class SMConfig {
     private static FileInputStream fileReader;
     private static HashMap< String, Object > dictionary;
     
+    /**
+     * Loads the config.
+     * @throws SMException
+     */
     public static void load() throws SMException {
         dictionary = new HashMap();
         
@@ -116,6 +124,11 @@ public abstract class SMConfig {
         SMLog.write( "Config loaded." );
     }
     
+    /**
+     * Sets the config name.
+     * @param name The config name to use.
+     * @throws SMException
+     */
     public static void setConfigName( String name ) throws SMException {
         if ( name.contains( "." ) ) {
             int pos = name.indexOf( "." );
@@ -127,6 +140,12 @@ public abstract class SMConfig {
         configname = name;
     }
     
+    /**
+     * Grabs a string value from the config.
+     * @param key The name of the key.
+     * @return A string containing the value, or "" if the key doesn't exist.
+     * @throws SMException
+     */
     public static String getString( String key ) throws SMException {
         if ( containsKey( key ) )
             return dictionary.get( key ).toString();
@@ -134,6 +153,12 @@ public abstract class SMConfig {
             return "";
     }
     
+    /**
+     * Grabs an integer value from the config.
+     * @param key The name of the key.
+     * @return An integer containing the value, or 0 if the key doesn't exist.
+     * @throws SMException
+     */
     public static int getInt( String key ) throws SMException {
         if ( containsKey( key ) )
             return (int)dictionary.get( key );
@@ -141,6 +166,12 @@ public abstract class SMConfig {
             return 0;
     }
     
+    /**
+     * Grabs a float value from the config.
+     * @param key The name of the key.
+     * @return Returns a float containing the value, otherwise 0 if the key doesn't exist.
+     * @throws SMException
+     */
     public static float getFloat( String key ) throws SMException {
         if ( containsKey( key ) )
             return (float)dictionary.get( key );
@@ -148,6 +179,12 @@ public abstract class SMConfig {
             return 0;
     }
     
+    /**
+     * Grabs a boolean value from the config.
+     * @param key The name of the key.
+     * @return A boolean containing the value, otherwise false if the key doesn't exist.
+     * @throws SMException
+     */
     public static boolean getBoolean( String key ) throws SMException {
         if ( containsKey( key ) )
             return (boolean)dictionary.get( key );
@@ -155,6 +192,12 @@ public abstract class SMConfig {
             return false;
     }
     
+    /**
+     * Checks if the config contains the key.
+     * @param key The name of the key.
+     * @return True if the key exists, otherwise false.
+     * @throws SMException
+     */
     public static boolean containsKey( String key ) throws SMException {
         return dictionary.containsKey( key );
     }

@@ -19,10 +19,16 @@
 package servermanager;
 
 /**
- * Various requests the server might ask for
+ * Various requests the server might ask for.
  * @author cheese
  */
 public abstract class SMRequests {
+    /**
+     * Parses requests from the CoD server.
+     * @param request Request.
+     * @param cvar Cvar to reset if the request is fulfilled.
+     * @throws SMException
+     */
     public static void parseRequest( String request, String cvar ) throws SMException {
         if ( !properlyFormatted( request ) ) {
             if ( !request.isEmpty() )
@@ -56,6 +62,14 @@ public abstract class SMRequests {
             SMCoD.setCvar( cvar, "\"\"" );
     }
 
+    /**
+     * Checks if the message is properly formatted via the following rules:
+     * 1) must not be empty
+     * 2) must start with \
+     * 3) if more than one \ is used, then there must be an even number (for key/pair stuff)
+     * @param message Message to check.
+     * @return True if the message is properly formatted, false otherwise.
+     */
     public static boolean properlyFormatted( String message ) {
         if ( message.isEmpty() )
             return false;
@@ -71,11 +85,19 @@ public abstract class SMRequests {
     }
     
     /* LOW PRIORITY REQUESTS */
+    /**
+     * Grabs the current time since the epoch, in seconds.
+     * @return A string containing the time.
+     */
     public static String getUnixTimestamp() {
         Integer time = (int)( System.currentTimeMillis() / 1000L );
         return time.toString();
     }
     
+    /**
+     * Grabs the seconds passed since 12:00 AM today.
+     * @return A string containing the time.
+     */
     public static String getCurrentTime() {
         Integer time = (int)( System.currentTimeMillis() / 1000L ) % ( 24 * 60 * 60 );
         return time.toString();

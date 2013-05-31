@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- * Servermanager logger class
+ * Custom log class. Features:
+ * - variable log levels
+ * - automatic logging on exceptions (SMException and SMRuntimeException)
  * @author cheese
  */
 public abstract class SMLog {

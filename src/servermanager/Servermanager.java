@@ -23,8 +23,8 @@ package servermanager;
  */
 public class Servermanager {      
     /**
-     * Main entry point to program.
-     * @param args Any command line arguments.
+     * Main entry point and main thread.
+     * @param args Any command line arguments. Not used.
      * @throws SMException
      */
     public static void main( String[] args ) throws SMException {
@@ -56,6 +56,8 @@ public class Servermanager {
             SMDatabase.setPassword( SMConfig.getString( "mysql_password" ) );
         
         SMDatabase.connect();
+        
+        SMCoD.initPlayers();
         
         try {         
             int ticks = 0;
@@ -131,9 +133,12 @@ public class Servermanager {
 
                             // every second, check if there's a medium priority server request
                             // e.g. idk
+                            // also, update player list + check for bans
                             if ( ticks % fps == 0 ) {
                                 tmp = SMCoD.stripRequest( SMCoD.rcon( "sm_request_med" ) );
                                 SMRequests.parseRequest( tmp, "sm_request_med" );
+                                
+                                SMCoD.updatePlayers();
 
                                 tmp = null;
                             }
@@ -163,6 +168,11 @@ public class Servermanager {
         }
     }
     
+    /**
+     * If cvars are not set, will make them blank to prevent "Server: [cvar]" message spamming
+     * @return Always returns true.
+     * @throws SMException
+     */
     public static boolean initCvars() throws SMException {
         // set our cvars to blank if they are not initialized yet
         if ( !SMCoD.isCvarSet( "sm_request_low" ) )

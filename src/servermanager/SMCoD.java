@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.HashMap;
 
 /**
  * Contains all methods important to Call of Duty.
@@ -31,6 +32,96 @@ public abstract class SMCoD {
     private static int PORT = 28960;
     private static String RCON_PASSWORD = "password";
     private static int RCON_DELAY = 500;
+    private static HashMap< Integer, SMCoDPlayer > players;
+    
+    /**
+     * Initializes our hashmap of client slots with blank SMCoDPlayers.
+     * @throws SMException
+     */
+    public static void initPlayers() throws SMException {
+        players = new HashMap();
+        for ( int i = 0; i < 64; i++ ) {
+            players.put( i, new SMCoDPlayer( i ) );
+        }
+    }
+    
+    /**
+     * Gets /rcon status from the server and updates our hashmap with current player's information.
+     * @throws SMException
+     */
+    public static void updatePlayers() throws SMException {
+        String status = command( "rcon " + RCON_PASSWORD + " status" );
+        
+        if ( status.contains( "Bad rconpassword." ) )
+            return;
+        
+        for ( int p = 0; p < 64; p++ ) {
+            SMCoDPlayer ply = players.get( p );
+            ply.reset();
+        }
+        
+        status = status.trim().substring( 10 );
+        
+        String data[] = status.split( "\n" );
+        String tmp;
+        String tmparray[];
+        
+        // first three are unimportant
+        for ( int i = 3; i < data.length; i++ ) {
+            try {
+                tmp = data[ i ].trim().replaceAll( " +", " " );
+                tmparray = tmp.split( " " );
+
+                int slot = Integer.parseInt( tmparray[ 0 ] );
+                int score = Integer.parseInt( tmparray[ 1 ] );
+                int ping = 999;
+                if ( !tmparray[ 2 ].equals( "CNCT" ) )
+                    ping = Integer.parseInt( tmparray[ 2 ] );
+                
+                StringBuffer buf = new StringBuffer();
+                int x = 0;
+                for ( ; x < tmparray.length - 7; x++ )
+                    buf.append(" ").append( tmparray[ 3 + x ]);
+                
+                String name = buf.toString().trim();
+                
+                if ( tmparray.length - 7 == 0 )
+                    name = tmparray[ 3 ];
+                
+                int lastMessage = Integer.parseInt( tmparray[ 3 + x ] );
+                String IP = tmparray[ 4 + x ];
+
+                int qport = Integer.parseInt( tmparray[ 5 + x ] );
+                int rate = Integer.parseInt( tmparray[ 6 + x ] );
+                
+                SMCoDPlayer ply = players.get( i );
+                
+                ply.init();
+                ply.setScore( score );
+                ply.setPing( ping );
+                ply.setName( name );
+                ply.setLastMessage( lastMessage );
+                ply.setIP( IP );
+                ply.setQPort( qport );
+                ply.setRate( rate );
+                
+                players.put( i, ply );
+            }
+            catch ( Exception ex ) {
+            }
+        }
+    }
+    
+    /**
+     * Gets a player from the hashmap.
+     * @param slot The client slot to retrieve.
+     * @return An SMCoDPlayer.
+     * @throws SMException
+     */
+    public static SMCoDPlayer getPlayer( int slot ) throws SMException {
+        SMCoDPlayer ply = players.get( slot );
+        return ply;
+    }
     
     /**
      * Basic implementation of a 'rconcommand' method.
@@ -67,7 +158,6 @@ public abstract class SMCoD {
     /**
      * Checks if the server is alive.
      * @return True if it is alive, false otherwise.
-     * @throws SMException
      */
     public static boolean checkServerStatus() {
         try {
@@ -83,6 +173,12 @@ public abstract class SMCoD {
         }
     }
     
+    /**
+     * Strips a cvar 'get' reply to its value.
+     * @param request The request.
+     * @return A string containing the value of the cvar.
+     * @throws SMException
+     */
     public static String stripRequest( String request ) throws SMException {
         if ( request.isEmpty() )
             return "";
@@ -90,10 +186,22 @@ public abstract class SMCoD {
         return request.substring( request.indexOf( ":" ) + 2, request.indexOf( "\"", request.indexOf( ":" ) + 2 ) );
     }
     
+    /**
+     * Sets a cvar to whatever value you want.
+     * @param cvar The cvar to set.
+     * @param value The value to set the cvar to.
+     * @throws SMException
+     */
     public static void setCvar( String cvar, String value ) throws SMException {
         command( "rcon " + RCON_PASSWORD + " set " + cvar + " " + value );
     }
     
+    /**
+     * Checks if a cvar is initialized (i.e. not set)
+     * @param cvar The cvar to check.
+     * @return Returns true if the cvar is initialized, otherwise false.
+     * @throws SMException
+     */
     public static boolean isCvarSet( String cvar ) throws SMException {
         String ret = command( "rcon " + RCON_PASSWORD + " " + cvar );
         

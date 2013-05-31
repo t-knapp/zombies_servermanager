@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Database entry point.
+ * Database management class.
  * @author cheese
  */
 public abstract class SMDatabase {
@@ -42,11 +42,7 @@ public abstract class SMDatabase {
     private static String MYSQL_PASSWORD = "zombies123";
     
     /**
-     * Main constructor for the database.
-     * @param url URL of the server.
-     * @param database Database name.
-     * @param username Username to connect with.
-     * @param password Password of the user.
+     * Connects to the database.
      * @throws SMException
      */
     public static void connect() throws SMException {
@@ -63,22 +59,42 @@ public abstract class SMDatabase {
         }
     }
     
+    /**
+     * Sets the URL.
+     * @param url The URL of the MySQL server.
+     */
     public static void setURL( String url ) {
         MYSQL_URL = url;
     }
     
+    /**
+     * Sets the port.
+     * @param port The port of the MySQL server.
+     */
     public static void setPort( int port ) {
         MYSQL_PORT = port;
     }
     
+    /**
+     * Sets the database to use.
+     * @param database The name of the database to use.
+     */
     public static void setDatabase( String database ) {
         MYSQL_DATABASE = database;
     }
     
+    /**
+     * Sets the username to access the database with.
+     * @param username The username to use.
+     */
     public static void setUsername( String username ) {
         MYSQL_USERNAME = username;
     }
     
+    /**
+     * Sets the password to access the database with.
+     * @param password The password to use.
+     */
     public static void setPassword( String password ) {
         MYSQL_PASSWORD = password;
     }
